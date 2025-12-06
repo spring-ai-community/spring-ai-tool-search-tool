@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,9 +59,9 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 	private final ToolCallback toolSearchToolCallback;
 
 	/**
-	 * The ToolReferenceRetriever used to find tools based on search queries.
+	 * The ToolSearcher used to find tools based on search queries.
 	 */
-	private final ToolNameReferenceRetriever toolRetriever;
+	private final ToolSearcher toolSearcher;
 
 	/**
 	 * The Tool Search system message suffix augment to be added to the prompt during
@@ -75,6 +76,10 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 	 * references.
 	 */
 	private final boolean referenceToolNameAccumulation;
+
+	private final Integer maxResults;
+
+	private final Random random = new Random();
 
 	private class ToolSearchTool {
 
@@ -93,8 +98,13 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 
 			String sessionId = toolContext.getContext().get("toolSearchToolConversationId").toString();
 
-			ToolSearchResponse toolSearchResponse = ToolSearchToolCallAdvisor.this.toolRetriever
-				.findTools(new ToolSearchRequest(sessionId, query, maxResults, categoryFilter));
+			// User defined maxResults takes precedence over the advisor configured
+			// default maxResults.s
+			maxResults = (ToolSearchToolCallAdvisor.this.maxResults != null) ? ToolSearchToolCallAdvisor.this.maxResults
+					: maxResults;
+
+			ToolSearchResponse toolSearchResponse = ToolSearchToolCallAdvisor.this.toolSearcher
+				.search(new ToolSearchRequest(sessionId, query, maxResults, categoryFilter));
 
 			return toolSearchResponse.toolReferences().stream().map(tr -> tr.toolName()).toList();
 		}
@@ -102,13 +112,14 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 	}
 
 	protected ToolSearchToolCallAdvisor(ToolCallingManager toolCallingManager, int advisorOrder,
-			ToolNameReferenceRetriever toolRetriever, String systemMessageSuffix,
-			boolean referenceToolNameAccumulation) {
+			ToolSearcher toolSearcher, String systemMessageSuffix, boolean referenceToolNameAccumulation,
+			Integer maxResults) {
 
 		super(toolCallingManager, advisorOrder);
-		this.toolRetriever = toolRetriever;
+		this.toolSearcher = toolSearcher;
 		this.systemMessageSuffix = systemMessageSuffix;
 		this.referenceToolNameAccumulation = referenceToolNameAccumulation;
+		this.maxResults = maxResults;
 
 		this.toolSearchToolCallback = MethodToolCallbackProvider.builder()
 			.toolObjects(new ToolSearchTool())
@@ -131,14 +142,14 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 
 			ConcurrentHashMap<String, ToolCallback> cachedResolvedToolCallbacks = new ConcurrentHashMap<>();
 
-			String conversationId = this.getConversationId(chatClientRequest.context(), "default");
+			String conversationId = this.getConversationId(chatClientRequest.context(), "default-" + random.nextInt());
 
-			this.toolRetriever.clear(conversationId);
+			this.toolSearcher.clearIndex(conversationId);
 
 			var toolDefinitions = this.toolCallingManager.resolveToolDefinitions(toolOptions);
 
 			toolDefinitions.stream().forEach(toolDef -> {
-				this.toolRetriever.addTool(conversationId, toolDef.name(), toolDef.description());
+				this.toolSearcher.indexTool(conversationId, toolDef.name(), toolDef.description());
 			});
 
 			if (!CollectionUtils.isEmpty(toolOptions.getToolCallbacks())) {
@@ -231,6 +242,15 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 			.toList();
 	}
 
+	private String getConversationId(Map<String, Object> context, String defaultConversationId) {
+		Assert.notNull(context, "context cannot be null");
+		Assert.noNullElements(context.keySet().toArray(), "context cannot contain null keys");
+		Assert.hasText(defaultConversationId, "defaultConversationId cannot be null or empty");
+
+		return context.containsKey(ChatMemory.CONVERSATION_ID) ? context.get(ChatMemory.CONVERSATION_ID).toString()
+				: defaultConversationId;
+	}
+
 	/**
 	 * Creates a new Builder instance for constructing a ToolSearchToolCallAdvisor.
 	 * @return a new Builder instance
@@ -250,11 +270,13 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 	 */
 	public static class Builder<T extends Builder<T>> extends ToolCallAdvisor.Builder<T> {
 
-		private ToolNameReferenceRetriever toolRetriever;
+		private ToolSearcher toolSearcher;
 
 		private String systemMessageSuffix;
 
 		private boolean referenceToolNameAccumulation = true;
+
+		private Integer maxResults;
 
 		protected Builder() {
 		}
@@ -270,12 +292,24 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 		}
 
 		/**
-		 * Sets the ToolReferenceRetriever to be used for finding tools.
-		 * @param toolRetriever the ToolReferenceRetriever instance
+		 * Sets the ToolSearcher to be used for finding tools.
+		 * @param toolSearcher the ToolSearcher instance
 		 * @return this Builder instance for method chaining
 		 */
-		public T toolRetriever(ToolNameReferenceRetriever toolRetriever) {
-			this.toolRetriever = toolRetriever;
+		public T toolSearcher(ToolSearcher toolSearcher) {
+			this.toolSearcher = toolSearcher;
+			return self();
+		}
+
+		/**
+		 * Sets the maximum number of tool references to return in tool search results.
+		 * This is the human/user defined default value used when invoking the tool search
+		 * tool.
+		 * @param maxResults
+		 * @return
+		 */
+		public T maxResults(Integer maxResults) {
+			this.maxResults = maxResults;
 			return self();
 		}
 
@@ -300,19 +334,10 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 				}
 			}
 
-			return new ToolSearchToolCallAdvisor(getToolCallingManager(), getAdvisorOrder(), this.toolRetriever,
-					this.systemMessageSuffix, this.referenceToolNameAccumulation);
+			return new ToolSearchToolCallAdvisor(getToolCallingManager(), getAdvisorOrder(), this.toolSearcher,
+					this.systemMessageSuffix, this.referenceToolNameAccumulation, this.maxResults);
 		}
 
-	}
-
-	private String getConversationId(Map<String, Object> context, String defaultConversationId) {
-		Assert.notNull(context, "context cannot be null");
-		Assert.noNullElements(context.keySet().toArray(), "context cannot contain null keys");
-		Assert.hasText(defaultConversationId, "defaultConversationId cannot be null or empty");
-
-		return context.containsKey(ChatMemory.CONVERSATION_ID) ? context.get(ChatMemory.CONVERSATION_ID).toString()
-				: defaultConversationId;
 	}
 
 }
