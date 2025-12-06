@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2025-2025 the original author or authors.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.logaritext.spring.ai.tool.search</groupId>
+	<artifactId>tool-search-tool-bom</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<name>Spring AI Tool Search Tool BOM</name>
+	<description>Bill of Materials POM (BOM) for the Spring AI Tool Search Tool modules</description>
+
+	<url>https://github.com/spring-projects/spring-ai</url>
+
+	<scm>
+		<url>https://github.com/spring-projects/spring-ai</url>
+		<connection>git://github.com/spring-projects/spring-ai.git</connection>
+		<developerConnection>git@github.com:spring-projects/spring-ai.git</developerConnection>
+	</scm>
+
+	<organization>
+		<name>Broadcom Inc.</name>
+		<url>https://spring.io</url>
+	</organization>
+
+	<issueManagement>
+		<system>Github Issues</system>
+		<url>https://github.com/spring-projects/spring-ai/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Github Actions</system>
+		<url>https://github.com/spring-projects/spring-ai/actions</url>
+	</ciManagement>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>spring-snapshots</id>
+			<url>https://repo.spring.io/libs-snapshot-local</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</snapshotRepository>
+		<repository>
+			<id>repo.spring.io</id>
+			<name>Spring Release Repository</name>
+			<url>https://repo.spring.io/libs-release-local</url>
+		</repository>
+	</distributionManagement>
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<properties>
+		<flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
+		<maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<dependency>
+				<groupId>com.logaritext.spring.ai.tool.search</groupId>
+				<artifactId>tool-search-tool</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.logaritext.spring.ai.tool.search</groupId>
+				<artifactId>tool-name-retriever-lucene</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.logaritext.spring.ai.tool.search</groupId>
+				<artifactId>tool-name-retriever-vectorstore</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+		</dependencies>
+
+	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<name>Central Portal Snapshots</name>
+			<id>central-portal-snapshots</id>
+			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>maven-central</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<developers>
+		<developer>
+			<id>tzolov</id>
+			<name>Christian Tzolov</name>
+			<email>christian tzolov at broadcom.com</email>
+			<organization>Broadcom</organization>
+			<organizationUrl>http://www.spring.io</organizationUrl>
+			<roles>
+				<role>lead</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>${flatten-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+						<configuration>
+							<updatePomFile>true</updatePomFile>
+							<flattenMode>ossrh</flattenMode>
+							<pomElements>
+								<distributionManagement>remove</distributionManagement>
+								<dependencyManagement>keep</dependencyManagement>
+								<repositories>remove</repositories>
+								<scm>keep</scm>
+								<url>keep</url>
+								<organization>resolve</organization>
+							</pomElements>
+						</configuration>
+					</execution>
+					<execution>
+						<id>clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>${maven-deploy-plugin.version}</version>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>artifactory-staging</id>
+			<distributionManagement>
+				<repository>
+					<id>spring-staging</id>
+					<url>https://repo.spring.io/libs-staging-local</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>artifactory-milestone</id>
+			<distributionManagement>
+				<repository>
+					<id>spring-milestones</id>
+					<url>https://repo.spring.io/libs-milestone-local</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>sonatype</id>
+			<properties>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.8.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+							<autoPublish>true</autoPublish>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>3.2.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<!-- Passphrase consumed from MAVEN_GPG_PASSPHRASE environment variable. -->
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

@@ -1,0 +1,173 @@
+/*
+* Copyright 2025 - 2025 the original author or authors.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package com.logaritext.spring.ai.tool.search;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.logaritex.spring.ai.tool.search.MutableToolCallbackResolver;
+import com.logaritex.spring.ai.tool.search.ToolReferenceRetriever;
+import com.logaritex.spring.ai.tool.search.ToolSearchResponse;
+
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
+import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.tool.ToolCallback;
+
+/**
+ * @author Christian Tzolov
+ */
+@SuppressWarnings("null")
+public class PreSelectToolCallAdvisor extends ToolCallAdvisor {
+
+	private final ToolReferenceRetriever toolRetriever;
+
+	private final MutableToolCallbackResolver toolCatalog;
+
+	protected PreSelectToolCallAdvisor(ToolCallingManager toolCallingManager, int advisorOrder,
+			ToolReferenceRetriever toolRetriever, MutableToolCallbackResolver toolCatalog) {
+
+		super(toolCallingManager, advisorOrder);
+		this.toolRetriever = toolRetriever;
+		this.toolCatalog = toolCatalog;
+	}
+
+	@Override
+	public String getName() {
+		return "PreSelectToolCallingAdvisor";
+	}
+
+	@Override
+	protected ChatClientRequest doInitializeLoop(ChatClientRequest chatClientRequest,
+			CallAdvisorChain callAdvisorChain) {
+		return chatClientRequest;
+	}
+
+	@Override
+	protected ChatClientRequest doBeforeCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
+
+		if (chatClientRequest.prompt().getOptions() instanceof ToolCallingChatOptions toolOptions) {
+
+			// Register tools in the tool catalog and the tool name retriever
+			toolOptions.getToolCallbacks().forEach(toolCallback -> {
+				var toolDefintion = toolCallback.getToolDefinition();
+				// Only tools that are not already registered.
+				if (!this.toolCatalog.contains(toolDefintion.name())) {
+					this.toolCatalog.add(toolCallback);
+					this.toolRetriever.addTool(toolDefintion.name(), toolDefintion.description());
+				}
+			});
+
+			// Find tool references from previous toolSearchTool responses.
+			String userMessagesText = chatClientRequest.prompt()
+				.getUserMessages()
+				.stream()
+				.map(m -> m.getText())
+				.collect(Collectors.joining("\n"));
+
+			ToolSearchResponse toolSearchResponse = this.toolRetriever.findTools2(userMessagesText);
+
+			Set<ToolCallback> selectedTools = new HashSet<>();
+
+			toolSearchResponse.toolReferences().forEach(toolReference -> {
+				ToolCallback tc = this.toolCatalog.resolve(toolReference.toolName());
+				if (tc != null) {
+					selectedTools.add(tc);
+				}
+			});
+
+			// Augment the prompt with the selected tools and augmented system
+			// message.
+			ToolCallingChatOptions toolOptionsCopy = toolOptions.copy();
+
+			toolOptionsCopy.setToolCallbacks(new ArrayList<>(selectedTools));
+
+			var augmentedChatClientRequest = chatClientRequest.mutate()
+				.prompt(chatClientRequest.prompt().mutate().chatOptions(toolOptionsCopy).build())
+				.build();
+
+			return augmentedChatClientRequest;
+			// }
+		}
+
+		return super.doBeforeCall(chatClientRequest, callAdvisorChain);
+	}
+
+	/**
+	 * Creates a new Builder instance for constructing a ToolSearchToolCallAdvisor.
+	 * @return a new Builder instance
+	 */
+	public static Builder<?> builder() {
+		return new Builder<>();
+	}
+
+	/**
+	 * Builder for creating instances of ToolSearchToolCallAdvisor.
+	 * <p>
+	 * This builder extends {@link ToolCallAdvisor.Builder} and adds configuration
+	 * options specific to tool search functionality.
+	 *
+	 * @param <T> the builder type, used for self-referential generics to support method
+	 * chaining in subclasses
+	 */
+	public static class Builder<T extends Builder<T>> extends ToolCallAdvisor.Builder<T> {
+
+		private ToolReferenceRetriever toolRetriever;
+
+		private MutableToolCallbackResolver toolCatalog;
+
+		protected Builder() {
+		}
+
+		/**
+		 * Sets the ToolReferenceRetriever to be used for finding tools.
+		 * @param toolRetriever the ToolReferenceRetriever instance
+		 * @return this Builder instance for method chaining
+		 */
+		public T toolRetriever(ToolReferenceRetriever toolRetriever) {
+			this.toolRetriever = toolRetriever;
+			return self();
+		}
+
+		/**
+		 * Sets the ToolCatalog to be used for storing and retrieving tool callbacks.
+		 * @param toolCatalog the ToolCatalog instance
+		 * @return this Builder instance for method chaining
+		 */
+		public T toolCatalog(MutableToolCallbackResolver toolCatalog) {
+			this.toolCatalog = toolCatalog;
+			return self();
+		}
+
+		/**
+		 * Builds and returns a new ToolSearchToolCallAdvisor instance with the configured
+		 * properties.
+		 * @return a new ToolSearchToolCallAdvisor instance
+		 * @throws IllegalArgumentException if required parameters are null or invalid
+		 */
+		@Override
+		public PreSelectToolCallAdvisor build() {
+			return new PreSelectToolCallAdvisor(getToolCallingManager(), getAdvisorOrder(), this.toolRetriever,
+					this.toolCatalog);
+		}
+
+	}
+
+}
