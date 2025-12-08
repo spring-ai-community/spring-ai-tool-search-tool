@@ -18,7 +18,7 @@ This achieves **significant token savings** while maintaining access to thousand
 
 The `ToolSearchToolCallAdvisor` extends Spring AI's `ToolCallAdvisor` to implement dynamic tool discovery:
 
-![Tool Search Tool Flow](./spring-ai-tool-search-tool-calling-flow.png)
+<img style="float: center; display: block; margin: auto;" src="https://github.com/spring-io/spring-io-static/blob/main/blog/tzolov/20251208/spring-ai-tool-search-tool-calling-flow.png?raw=true" width="600"/>
 
 1. **Indexing**: At conversation start, all registered tools are indexed in the `ToolSearcher` (but NOT sent to the LLM)
 2. **Initial Request**: Only the Tool Search Tool (TST) definition is sent to the LLM
