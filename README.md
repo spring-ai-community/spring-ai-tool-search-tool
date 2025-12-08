@@ -8,7 +8,7 @@ As AI agents connect to more services—Slack, GitHub, Jira, MCP servers—tool 
 
 ## The Solution
 
-<img style="float: center; display: block; margin: auto;" src="https://github.com/spring-io/spring-io-static/blob/main/blog/tzolov/20251208/spring-ai-tool-search-tool-calling-flow.png?raw=true" width="400" align="right"/>
+<img style="fdisplay: block; margin: 0px auto; padding: 10px;" src="https://github.com/spring-io/spring-io-static/blob/main/blog/tzolov/20251208/spring-ai-tool-search-tool-calling-flow.png?raw=true" width="300" align="left"/>
 
 This project implements the **[Tool Search Tool](https://www.anthropic.com/engineering/advanced-tool-use)** pattern for Spring AI:
 - Model receives only a search tool initially (minimal tokens)
