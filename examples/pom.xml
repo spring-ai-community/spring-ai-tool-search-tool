@@ -8,6 +8,9 @@
     <artifactId>examples-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
+    <name>Tool Search Tool Examples Parent</name>
+    <description>Parent project for Tool Search Tool examples</description>
+
     <url>https://github.com/tzolov/spring-ai-tool-search-tool</url>
 
     <scm>
@@ -15,10 +18,6 @@
         <connection>git://github.com/tzolov/spring-ai-tool-search-tool.git</connection>
         <developerConnection>git@github.com:tzolov/spring-ai-tool-search-tool.git</developerConnection>
     </scm>
-
-    <name>MCP Java SDK - Annotations Parent</name>
-    <description>This module enables developers to easily create and register methods for handling MCP operations using simple annotations</description>
-
 
     <organization>
         <name>Logaritex</name>
