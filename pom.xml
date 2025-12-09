@@ -287,6 +287,9 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
+                            <excludeArtifacts>
+                                tool-search-tool-parent,tool-search-tool-app
+                            </excludeArtifacts>
                             <autoPublish>true</autoPublish>
                         </configuration>
                     </plugin>
