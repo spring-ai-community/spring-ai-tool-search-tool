@@ -18,10 +18,10 @@ package com.logaritex.spring.ai.tool.search;
 /**
  * Interface for searching and discovering tools on-demand.
  * <p>
- * Implementations provide different search strategies (keyword-based, semantic, regex)
- * to find relevant tools from a registered catalog based on search queries.
- * This aligns with Anthropic's Tool Search Tool concept for dynamic tool discovery.
- * 
+ * Implementations provide different search strategies (keyword-based, semantic, regex) to
+ * find relevant tools from a registered catalog based on search queries. This aligns with
+ * Anthropic's Tool Search Tool concept for dynamic tool discovery.
+ *
  * @author Christian Tzolov
  */
 public interface ToolSearcher {
@@ -31,13 +31,13 @@ public interface ToolSearcher {
 	 * @return the search type (KEYWORD, SEMANTIC, or REGEX)
 	 */
 	SearchType searchType();
-	
+
 	/**
 	 * Registers a tool in the search index for the specified session.
 	 * @param sessionId the session identifier for tool isolation
 	 * @param toolReference the reference to the tool being indexed
 	 */
-	void indexTool(String sessionId, ToolReference toolReference);		
+	void indexTool(String sessionId, ToolReference toolReference);
 
 	/**
 	 * Searches for tools matching the given request criteria.
@@ -45,10 +45,11 @@ public interface ToolSearcher {
 	 * @return a response containing matching tool references
 	 */
 	ToolSearchResponse search(ToolSearchRequest toolSearchRequest);
-	
+
 	/**
 	 * Clears all indexed tools for the specified session.
 	 * @param sessionId the session identifier
 	 */
 	void clearIndex(String sessionId);
+
 }

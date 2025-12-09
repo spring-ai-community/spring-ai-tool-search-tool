@@ -7,6 +7,7 @@ import com.logaritex.spring.ai.tool.search.ToolSearcher;
 import com.logaritex.spring.ai.tool.search.ToolSearchToolCallAdvisor;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.boot.CommandLineRunner;
@@ -33,6 +34,7 @@ public class Application {
 
 			ChatClient chatClient = chatClientBuilder // @formatter:off
 				.defaultTools(new MyTools())
+				// .defaultAdvisors(ToolCallAdvisor.builder().build())
 				.defaultAdvisors(toolSearchToolCallAdvisor)
 				.defaultAdvisors(new MyLoggingAdvisor())
 				.build();
@@ -51,12 +53,12 @@ public class Application {
 
 	static class MyTools {
 
-		@Tool(description = "Get the current weather for a given location and at a given time")
+		@Tool(description = "Get the weather for a given location and at a given time")
 		public String weather(String location, @ToolParam(description = "YYYY-MM-DDTHH:mm:ss") String atTime) {
 			return "The current weather in " + location + " is sunny with a temperature of 25°C.";
 		}
 
-		@Tool(description = "Get of clothing shops names for a given location")
+		@Tool(description = "Get of clothing shops names for a given location and at a given time")
 		public List<String> clothing(String location,
 				@ToolParam(description = "YYYY-MM-DDTHH:mm:ss") String openAtTime) {
 			return List.of("Foo", "Bar", "Baz");

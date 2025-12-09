@@ -85,7 +85,8 @@ public class VectorToolSearcher implements Closeable, ToolSearcher {
 
 	/**
 	 * Creates a new VectorToolSearcher with the given vector store.
-	 * @param vectorStore the vector store to use for storing and searching tool embeddings
+	 * @param vectorStore the vector store to use for storing and searching tool
+	 * embeddings
 	 */
 	public VectorToolSearcher(VectorStore vectorStore) {
 		this.vectorStore = vectorStore;
@@ -116,11 +117,7 @@ public class VectorToolSearcher implements Closeable, ToolSearcher {
 			Double relevanceScore = doc.getScore();
 			String summary = (String) doc.getMetadata().get(METADATA_TOOL_DESCRIPTION);
 
-			return ToolReference.builder()
-				.toolName(toolName)
-				.relevanceScore(relevanceScore)
-				.summary(summary)
-				.build();
+			return ToolReference.builder().toolName(toolName).relevanceScore(relevanceScore).summary(summary).build();
 		}).filter(Objects::nonNull).toList();
 
 		return ToolSearchResponse.builder()
