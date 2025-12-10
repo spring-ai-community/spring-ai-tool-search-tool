@@ -6,7 +6,7 @@
 
     <groupId>org.springaicommunity</groupId>
     <artifactId>tool-search-tool-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <name>Tool Search Tool Parent</name>
 
