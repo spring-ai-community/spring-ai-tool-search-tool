@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.springaicommunity</groupId>
 		<artifactId>tool-search-tool-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>tool-searcher-regex</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>tool-searcher-regex</name>
 	<description>Regex-based tool searcher implementation</description>
 

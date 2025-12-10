@@ -7,12 +7,12 @@
 	<parent>
 		<groupId>org.springaicommunity</groupId>
 		<artifactId>tool-search-tool-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>tool-searcher-vectorstore</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>tool-searcher-vectorstore</name>
 	<description>Vector store-based tool searcher implementation</description>
 
