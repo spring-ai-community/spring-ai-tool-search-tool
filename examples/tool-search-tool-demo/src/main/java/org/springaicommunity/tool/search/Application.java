@@ -29,11 +29,12 @@ public class Application {
 
 			var toolSearchToolCallAdvisor = ToolSearchToolCallAdvisor.builder()
 				.toolSearcher(toolSearcher)
+				.referenceToolNameAccumulation(false)
 				// .maxResults(2)
 				.build();
 
-			ChatClient chatClient = chatClientBuilder // @formatter:off
-				.defaultTools(new MyTools())
+			ChatClient chatClient = chatClientBuilder // @formatter:off			
+				.defaultTools(new MyTools(), new DummyTools())
 				// .defaultAdvisors(ToolCallAdvisor.builder().build())
 				.defaultAdvisors(toolSearchToolCallAdvisor)
 				.defaultAdvisors(new MyLoggingAdvisor())
@@ -45,7 +46,7 @@ public class Application {
 					Please suggest clothing shops that are open right now in the area.
 
 					Do not make assumptions about the date, time. Use the tools for getting the current time.
-					""").call().content();
+					""").advisors(new TokenCounterAdvisor()).call().content();
 
 			System.out.println(answer);
 		};

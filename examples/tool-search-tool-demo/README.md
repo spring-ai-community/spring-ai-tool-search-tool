@@ -28,10 +28,12 @@ Demonstrates the Tool Search Tool pattern:
 ```java
 var toolSearchToolCallAdvisor = ToolSearchToolCallAdvisor.builder()
     .toolSearcher(toolSearcher)
+    .referenceToolNameAccumulation(false)  // Don't accumulate discovered tools
+    // .maxResults(2)
     .build();
 
 ChatClient chatClient = chatClientBuilder
-    .defaultTools(new MyTools())  // Tools registered but NOT sent to LLM initially
+    .defaultTools(new MyTools(), new DummyTools())  // Tools registered but NOT sent to LLM initially
     .defaultAdvisors(toolSearchToolCallAdvisor)
     .defaultAdvisors(new MyLoggingAdvisor())
     .build();
@@ -39,51 +41,100 @@ ChatClient chatClient = chatClientBuilder
 var answer = chatClient.prompt("""
     Help me plan what to wear today in Landsmeer, NL.
     Please suggest clothing shops that are open right now in the area.
-    """).call().content();
+
+    Do not make assumptions about the date, time. Use the tools for getting the current time.
+    """).advisors(new TokenCounterAdvisor()).call().content();
 ```
 
 **Key aspects:**
 - `ToolSearchToolCallAdvisor`: Intercepts tool calling to enable on-demand discovery
+- `referenceToolNameAccumulation(false)`: Controls whether discovered tools accumulate across iterations
+- `TokenCounterAdvisor`: Tracks token usage for monitoring purposes
 - Tools are indexed but NOT sent to the LLM initially - only the search tool is provided
 - LLM discovers tools by calling `toolSearchTool` as needed
 
 ### 2. Sample Tools (`MyTools` class)
 
+The core tools that will be discovered on-demand by the LLM:
+
 ```java
-@Tool(description = "Get the current weather for a given location and at a given time")
-public String weather(String location, String atTime) {
+@Tool(description = "Get the weather for a given location and at a given time")
+public String weather(String location, @ToolParam(description = "YYYY-MM-DDTHH:mm:ss") String atTime) {
     return "The current weather in " + location + " is sunny with a temperature of 25°C.";
 }
 
-@Tool(description = "Get of clothing shops names for a given location")
-public List<String> clothing(String location, String openAtTime) {
+@Tool(description = "Get of clothing shops names for a given location and at a given time")
+public List<String> clothing(String location, @ToolParam(description = "YYYY-MM-DDTHH:mm:ss") String openAtTime) {
     return List.of("Foo", "Bar", "Baz");
 }
 
-@Tool(description = "Provides the current date and time for a given location")
+@Tool(description = "Provides the current date and time (as date-time string) for a given location")
 public String currentTime(String location) {
     return LocalDateTime.now().toString();
 }
 ```
 
-These tools are discovered on-demand by the LLM, not loaded upfront.
+### 3. Dummy Tools (`DummyTools` class)
 
-### 3. Configuration (`Config.java`)
+A collection of **25+ noise tools** used to demonstrate the Tool Search Tool's ability to filter through a large tool library. These tools simulate a realistic scenario where many tools are registered but only a few are relevant to any given request.
+
+They are deliberately **not relevant** to the weather/clothing task, demonstrating how the tool search efficiently finds only the needed tools (`weather`, `clothing`, `currentTime`) among many unrelated options.
+
+### 4. Configuration (`Config.java`)
 
 Configures the `ToolSearcher` implementation. Options include:
+- `LuceneToolSearcher` - Keyword-based full-text search (default, with 0.4f threshold)
 - `VectorToolSearcher` - Semantic search using embeddings
-- `LuceneToolSearcher` - Keyword-based full-text search
 - `RegexToolSearcher` - Pattern matching
 
-### 4. Logging Advisor (`MyLoggingAdvisor`)
+```java
+@Bean
+ToolSearcher luceneToolSearcher() {
+    return new LuceneToolSearcher(0.4f);
+}
+```
 
-Logs each iteration to show the progressive tool discovery:
+### 5. Logging Advisor (`MyLoggingAdvisor`)
+
+Logs each iteration to show the progressive tool discovery, displaying available tools and message exchanges:
 
 ```java
 @Override
-public ChatClientRequest before(ChatClientRequest request, AdvisorChain chain) {
-    print("REQUEST", request.prompt().getInstructions());
-    return request;
+public ChatClientRequest before(ChatClientRequest chatClientRequest, AdvisorChain advisorChain) {
+    Object tools = "No Tools";
+    if (chatClientRequest.prompt().getOptions() instanceof ToolCallingChatOptions toolOptions) {
+        tools = toolOptions.getToolCallbacks().stream().map(tc -> tc.getToolDefinition().name()).toList();
+    }
+    // ... format and print USER request with available TOOLS
+    return chatClientRequest;
+}
+
+@Override
+public ChatClientResponse after(ChatClientResponse chatClientResponse, AdvisorChain advisorChain) {
+    // ... format and print ASSISTANT response
+    return chatClientResponse;
+}
+```
+
+### 6. Token Counter Advisor (`TokenCounterAdvisor`)
+
+Tracks and reports token usage across all LLM calls, helping to measure the efficiency of the tool search approach:
+
+```java
+@Override
+public ChatClientResponse after(ChatClientResponse chatClientResponse, AdvisorChain advisorChain) {
+    var usage = chatClientResponse.chatResponse().getMetadata().getUsage();
+    
+    totalTokenCounter.addAndGet(usage.getTotalTokens());
+    promptTokenCounter.addAndGet(usage.getPromptTokens());
+    completionTokenCounter.addAndGet(usage.getCompletionTokens());
+
+    System.out.println("Current TOKENS Total: " + usage.getTotalTokens() + 
+        ", Completion: " + usage.getCompletionTokens() + ", Prompt: " + usage.getPromptTokens());
+    System.out.println("Accumulated TOKENS Total: " + totalTokenCounter.get() + 
+        ", Completion: " + completionTokenCounter.get() + ", Prompt: " + promptTokenCounter.get());
+    
+    return chatClientResponse;
 }
 ```
 
@@ -110,24 +161,21 @@ When running the demo, you'll see the tool discovery process:
 ## Sample Output
 
 ```
-REQUEST: TOOLS: ["toolSearchTool"]
-text: "Help me plan what to wear today in Landsmeer, NL..."
+USER:
+ - SYSTEM 
+ - {"messageType":"USER","media":[],"metadata":{},"content":"Help me plan what to wear today..."}
+   TOOLS: ["toolSearchTool"]
 
-RESPONSE:
-- toolSearchTool({"query":"current time and date"})
+ASSISTANT:
+ - {"messageType":"ASSISTANT","toolCalls":[{"id":"...","type":"FUNCTION","name":"toolSearchTool",...}],...}
 
-REQUEST: TOOLS: ["toolSearchTool","currentTime","weather"]
-- toolSearchTool -> ["currentTime","weather"]
+Current TOKENS Total: 1234, Completion: 100, Prompt: 1134
+Accumulated TOKENS Total: 1234, Completion: 100, Prompt: 1134
 
-RESPONSE:
-- currentTime({"location":"Landsmeer, NL"})
-
-REQUEST: TOOLS: ["toolSearchTool","currentTime","weather"]
-- currentTime -> "2025-12-08T12:30:26"
-
-RESPONSE:
-- weather({"location":"Landsmeer, NL","atTime":"2025-12-08T12:30"})
-- toolSearchTool({"query":"clothing shops"})
+USER:
+ - SYSTEM 
+ - {"messageType":"USER",...}
+   TOOLS: ["toolSearchTool","currentTime","weather"]
 
 ...
 
