@@ -1,4 +1,4 @@
-package com.logaritex.spring.ai.tool.search;
+package org.springaicommunity.tool.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

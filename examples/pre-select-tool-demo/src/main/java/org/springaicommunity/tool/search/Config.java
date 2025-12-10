@@ -13,12 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.logaritex.spring.ai.tool.search;
+package org.springaicommunity.tool.search;
 
 import com.example.tool.search.LuceneToolSearcher;
 import com.example.tool.search.RegexToolSearcher;
 import com.example.tool.search.VectorToolSearcher;
-import com.logaritex.spring.ai.tool.search.ToolSearcher;
+import org.springaicommunity.tool.search.ToolSearcher;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
@@ -37,12 +37,12 @@ public class Config {
 		return SimpleVectorStore.builder(embeddingModel).build();
 	}
 
-	// @Bean
+	@Bean
 	ToolSearcher vectorToolSearcher(VectorStore vectorStore) {
 		return new VectorToolSearcher(vectorStore);
 	}
 
-	@Bean
+	// @Bean
 	ToolSearcher luceneToolSearcher() {
 		return new LuceneToolSearcher(0.4f);
 	}

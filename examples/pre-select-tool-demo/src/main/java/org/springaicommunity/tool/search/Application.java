@@ -1,10 +1,9 @@
-package com.logaritex.spring.ai.tool.search;
+package org.springaicommunity.tool.search;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.logaritex.spring.ai.tool.search.ToolSearcher;
-import com.logaritex.spring.ai.tool.search.ToolSearchToolCallAdvisor;
+import org.springaicommunity.tool.search.ToolSearcher;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
@@ -27,25 +26,29 @@ public class Application {
 
 		return args -> {
 
-			var toolSearchToolCallAdvisor = ToolSearchToolCallAdvisor.builder()
-				.toolSearcher(toolSearcher)
-				// .maxResults(2)
-				.build();
-
 			ChatClient chatClient = chatClientBuilder // @formatter:off
 				.defaultTools(new MyTools())
-				// .defaultAdvisors(ToolCallAdvisor.builder().build())
-				.defaultAdvisors(toolSearchToolCallAdvisor)
+				.defaultAdvisors(PreSelectToolCallAdvisor.builder()
+					.toolSearcher(toolSearcher)
+					.build())
+				.defaultAdvisors(ToolCallAdvisor.builder().build())
 				.defaultAdvisors(new MyLoggingAdvisor())
 				.build();
 				// @formatter:on
 
-			var answer = chatClient.prompt("""
-					Help me plan what to wear today in Landsmeer, NL.
-					Please suggest clothing shops that are open right now in the area.
+			var answer1 = chatClient
+				.prompt("""
+						Please provide short summary of the reasoning steps and required tools you would use to answer the following question:
+						---
+						What should I wear right now in Landsmeer, NL.
+						Please suggest some budget-friendly counth shops in provided location that are open in the suggested time.
+						---
+						""")
+				.call()
+				.content();
 
-					Do not make assumptions about the date, time. Use the tools for getting the current time.
-					""").call().content();
+			System.out.println("CoT Answer: " + answer1);
+			var answer = chatClient.prompt(answer1).call().content();
 
 			System.out.println(answer);
 		};
@@ -53,14 +56,15 @@ public class Application {
 
 	static class MyTools {
 
-		@Tool(description = "Get the weather for a given location and at a given time")
-		public String weather(String location, @ToolParam(description = "YYYY-MM-DDTHH:mm:ss") String atTime) {
+		@Tool(description = "Get the current weather for a given location and at a given time")
+		public String weather(String location, @ToolParam(
+				description = "The time to check the weather for the given location as date-time string") String atTime) {
 			return "The current weather in " + location + " is sunny with a temperature of 25°C.";
 		}
 
-		@Tool(description = "Get of clothing shops names for a given location and at a given time")
+		@Tool(description = "Get of clothing shops names for a given location")
 		public List<String> clothing(String location,
-				@ToolParam(description = "YYYY-MM-DDTHH:mm:ss") String openAtTime) {
+				@ToolParam(description = "The time to check for open shops as date-time string") String openAtTime) {
 			return List.of("Foo", "Bar", "Baz");
 		}
 

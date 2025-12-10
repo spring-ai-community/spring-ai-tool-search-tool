@@ -43,7 +43,7 @@ Uses Spring AI's `VectorStore` for embedding-based semantic search. Tool descrip
 
 ```xml
 <dependency>
-    <groupId>com.logaritex</groupId>
+    <groupId>org.springaicommunity</groupId>
     <artifactId>tool-searcher-vectorstore</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
@@ -86,7 +86,7 @@ Uses Apache Lucene for keyword-based full-text search. Efficient for exact term 
 
 ```xml
 <dependency>
-    <groupId>com.logaritex</groupId>
+    <groupId>org.springaicommunity</groupId>
     <artifactId>tool-searcher-lucene</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
@@ -137,7 +137,7 @@ Uses regular expression pattern matching against tool names and descriptions.
 
 ```xml
 <dependency>
-    <groupId>com.logaritex</groupId>
+    <groupId>org.springaicommunity</groupId>
     <artifactId>tool-searcher-regex</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>

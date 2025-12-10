@@ -24,12 +24,12 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.logaritex.spring.ai.tool.search.SearchType;
-import com.logaritex.spring.ai.tool.search.ToolReference;
-import com.logaritex.spring.ai.tool.search.ToolSearcher;
-import com.logaritex.spring.ai.tool.search.ToolSearchRequest;
-import com.logaritex.spring.ai.tool.search.ToolSearchResponse;
-import com.logaritex.spring.ai.tool.search.ToolSearchResponse.SearchMetadata;
+import org.springaicommunity.tool.search.SearchType;
+import org.springaicommunity.tool.search.ToolReference;
+import org.springaicommunity.tool.search.ToolSearcher;
+import org.springaicommunity.tool.search.ToolSearchRequest;
+import org.springaicommunity.tool.search.ToolSearchResponse;
+import org.springaicommunity.tool.search.ToolSearchResponse.SearchMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

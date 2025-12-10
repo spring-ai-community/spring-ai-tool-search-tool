@@ -32,14 +32,14 @@ The `ToolSearchToolCallAdvisor` extends Spring AI's `ToolCallAdvisor` to impleme
 
 ```xml
 <dependency>
-    <groupId>com.logaritex</groupId>
+    <groupId>org.springaicommunity</groupId>
     <artifactId>tool-search-tool</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
 
 <!-- Choose a search strategy -->
 <dependency>
-    <groupId>com.logaritex</groupId>
+    <groupId>org.springaicommunity</groupId>
     <artifactId>tool-searcher-vectorstore</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>

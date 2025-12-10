@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.logaritex.spring.ai.tool.search;
+package org.springaicommunity.tool.search;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,10 +23,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import com.logaritex.spring.ai.tool.search.ToolReference;
-import com.logaritex.spring.ai.tool.search.ToolSearchRequest;
-import com.logaritex.spring.ai.tool.search.ToolSearchResponse;
-import com.logaritex.spring.ai.tool.search.ToolSearcher;
+import org.springaicommunity.tool.search.ToolReference;
+import org.springaicommunity.tool.search.ToolSearchRequest;
+import org.springaicommunity.tool.search.ToolSearchResponse;
+import org.springaicommunity.tool.search.ToolSearcher;
 
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;

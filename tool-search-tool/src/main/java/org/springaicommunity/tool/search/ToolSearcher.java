@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.logaritex.spring.ai.tool.search;
+package org.springaicommunity.tool.search;
 
 /**
  * Interface for searching and discovering tools on-demand.
