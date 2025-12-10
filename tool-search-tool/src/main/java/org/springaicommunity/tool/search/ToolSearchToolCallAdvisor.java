@@ -242,7 +242,7 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 			.toList();
 
 		if (CollectionUtils.isEmpty(toolSearchToolResponses)) {
-			List.of();
+			return List.of();
 		}
 
 		toolSearchToolResponses = (this.referenceToolNameAccumulation) ? toolSearchToolResponses
