@@ -15,10 +15,10 @@
 */
 package org.springaicommunity.tool.search;
 
-import com.example.tool.search.LuceneToolSearcher;
-import com.example.tool.search.RegexToolSearcher;
-import com.example.tool.search.VectorToolSearcher;
 import org.springaicommunity.tool.search.ToolSearcher;
+import org.springaicommunity.tool.searcher.LuceneToolSearcher;
+import org.springaicommunity.tool.searcher.RegexToolSearcher;
+import org.springaicommunity.tool.searcher.VectorToolSearcher;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.example.tool.search;
+package org.springaicommunity.tool.searcher;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,14 +24,14 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.springaicommunity.tool.search.SearchType;
-import org.springaicommunity.tool.search.ToolReference;
-import org.springaicommunity.tool.search.ToolSearcher;
-import org.springaicommunity.tool.search.ToolSearchRequest;
-import org.springaicommunity.tool.search.ToolSearchResponse;
-import org.springaicommunity.tool.search.ToolSearchResponse.SearchMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springaicommunity.tool.search.SearchType;
+import org.springaicommunity.tool.search.ToolReference;
+import org.springaicommunity.tool.search.ToolSearchRequest;
+import org.springaicommunity.tool.search.ToolSearchResponse;
+import org.springaicommunity.tool.search.ToolSearcher;
+import org.springaicommunity.tool.search.ToolSearchResponse.SearchMetadata;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
