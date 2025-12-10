@@ -39,6 +39,22 @@ spring-ai-tool-search-tool/
 
 ### 1. Add Dependencies
 
+Add the snapshot repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>central-snapshots</id>
+        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+```
+
+Then add the dependencies:
+
 ```xml
 <dependency>
     <groupId>org.springaicommunity</groupId>
