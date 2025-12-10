@@ -241,7 +241,7 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 			.filter(r -> r.name().equalsIgnoreCase(this.toolSearchToolCallback.getToolDefinition().name()))
 			.toList();
 
-		if (!toolSearchToolResponses.isEmpty()) {
+		if (CollectionUtils.isEmpty(toolSearchToolResponses)) {
 			List.of();
 		}
 
@@ -300,6 +300,7 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 		}
 
 		public T systemMessageSuffix(String systemMessageSuffix) {
+			Assert.hasText(systemMessageSuffix, "systemMessageSuffix cannot be null or empty");
 			this.systemMessageSuffix = systemMessageSuffix;
 			return self();
 		}
@@ -310,6 +311,7 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 		 * @return this Builder instance for method chaining
 		 */
 		public T toolSearcher(ToolSearcher toolSearcher) {
+			Assert.notNull(toolSearcher, "toolSearcher cannot be null");
 			this.toolSearcher = toolSearcher;
 			return self();
 		}
@@ -345,6 +347,10 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 					throw new IllegalArgumentException(
 							"Failed to load default system message suffix from classpath resource", ex);
 				}
+			}
+
+			if (this.toolSearcher == null) {
+				throw new IllegalArgumentException("toolSearcher cannot be null");
 			}
 
 			return new ToolSearchToolCallAdvisor(getToolCallingManager(), getAdvisorOrder(), this.toolSearcher,

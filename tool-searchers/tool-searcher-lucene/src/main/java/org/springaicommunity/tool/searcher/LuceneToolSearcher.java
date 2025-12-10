@@ -269,7 +269,7 @@ public class LuceneToolSearcher implements Closeable, ToolSearcher {
 		List<ToolReference> foundToolReferences = new ArrayList<>(results.scoreDocs.length);
 		StoredFields storedFields = searcher.storedFields();
 		for (ScoreDoc scoreDoc : results.scoreDocs) {
-			logger.info("Score: " + scoreDoc.score);
+			logger.info("Score: {}, name: {}", scoreDoc.score, storedFields.document(scoreDoc.doc).get(FIELD_TOOL_NAME));
 			if (scoreDoc.score >= minScore) {
 				var doc = storedFields.document(scoreDoc.doc);
 				foundToolReferences.add(ToolReference.builder()
