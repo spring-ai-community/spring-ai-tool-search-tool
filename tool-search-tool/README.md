@@ -98,7 +98,9 @@ Uses embedding-based similarity search. Best for natural language queries where 
 ```java
 @Bean
 ToolSearcher luceneToolSearcher() {
-    return new LuceneToolSearcher(0.4f);  // similarity threshold
+    return new LuceneToolSearcher();  // uses default threshold of 0.25
+    // or with custom threshold:
+    // return new LuceneToolSearcher(0.4f);  // minimum score threshold
 }
 ```
 
