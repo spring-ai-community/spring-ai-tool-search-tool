@@ -1,4 +1,4 @@
-# Tool Search Tool for Spring AI [![build status](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/ci.yml)
+# Tool Search Tool for Spring AI [![build status](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml/badge.svg)](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity/tool-search-tool?label=Maven%20Central)](https://central.sonatype.com/artifact/org.springaicommunity/tool-search-tool)
 [![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
