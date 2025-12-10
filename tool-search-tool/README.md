@@ -34,14 +34,14 @@ The `ToolSearchToolCallAdvisor` extends Spring AI's `ToolCallAdvisor` to impleme
 <dependency>
     <groupId>org.springaicommunity</groupId>
     <artifactId>tool-search-tool</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 
 <!-- Choose a search strategy -->
 <dependency>
     <groupId>org.springaicommunity</groupId>
     <artifactId>tool-searcher-vectorstore</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
