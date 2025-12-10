@@ -48,6 +48,10 @@
 
     <packaging>pom</packaging>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <modules>
         <module>tool-search-tool-demo</module>
         <!-- <module>pre-select-tool-demo</module> -->
