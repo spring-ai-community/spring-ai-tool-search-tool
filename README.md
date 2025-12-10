@@ -2,7 +2,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity/tool-search-tool?label=Maven%20Central&versionPrefix=2)](https://central.sonatype.com/artifact/org.springaicommunity/tool-search-tool)
 [![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
-> NOTE: this is Spring AI 2.0.x (e.g. Boot 4.x and Spring Framework 7.x) compatibible version.
+> **NOTE:** this is Spring AI 2.0.x (e.g. Boot 4.x and Spring Framework 7.x) compatibible version.
+
+>For Spring AI 1.1.x/Boot3 compatible veriosn visit: [Tool Search Tool v1.0.x](https://github.com/spring-ai-community/spring-ai-tool-search-tool/tree/1.0.x)
 
 
 Dynamic tool discovery and selection for Spring AI, enabling LLMs to work efficiently with large tool libraries by discovering tools on-demand instead of loading all definitions upfront.
