@@ -34,35 +34,40 @@
 	<name>Spring AI Tool Search Tool BOM</name>
 	<description>Bill of Materials POM (BOM) for the Spring AI Tool Search Tool modules</description>
 
-	<url>https://github.com/spring-projects/spring-ai</url>
+    <url>https://github.com/spring-ai-community/spring-ai-tool-search-tool</url>
 
-	<scm>
-		<url>https://github.com/spring-projects/spring-ai</url>
-		<connection>git://github.com/spring-projects/spring-ai.git</connection>
-		<developerConnection>git@github.com:spring-projects/spring-ai.git</developerConnection>
-	</scm>
+    <scm>
+        <url>https://github.com/spring-ai-community/spring-ai-tool-search-tool</url>
+        <connection>git://github.com/spring-ai-community/spring-ai-tool-search-tool.git</connection>
+        <developerConnection>git@github.com:spring-ai-community/spring-ai-tool-search-tool.git</developerConnection>
+    </scm>
 
-	<organization>
-		<name>Broadcom Inc.</name>
-		<url>https://spring.io</url>
-	</organization>
+    <organization>
+        <name>Logaritex</name>
+        <url>https://github.com/tzolov</url>
+    </organization>
 
-	<issueManagement>
-		<system>Github Issues</system>
-		<url>https://github.com/spring-projects/spring-ai/issues</url>
-	</issueManagement>
-	<ciManagement>
-		<system>Github Actions</system>
-		<url>https://github.com/spring-projects/spring-ai/actions</url>
-	</ciManagement>
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
 
-	<licenses>
-		<license>
-			<name>Apache 2.0</name>
-			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <developers>
+        <developer>
+            <name>Christian Tzolov</name>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>Github Issues</system>
+        <url>https://github.com/spring-ai-community/spring-ai-tool-search-tool/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <system>Github Actions</system>
+        <url>https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions</url>
+    </ciManagement>
 
 	<properties>
 		<flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
@@ -142,19 +147,6 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
-	<developers>
-		<developer>
-			<id>tzolov</id>
-			<name>Christian Tzolov</name>
-			<email>christian tzolov at broadcom.com</email>
-			<organization>Broadcom</organization>
-			<organizationUrl>http://www.spring.io</organizationUrl>
-			<roles>
-				<role>lead</role>
-			</roles>
-		</developer>
-	</developers>
 
 	<build>
 		<plugins>
