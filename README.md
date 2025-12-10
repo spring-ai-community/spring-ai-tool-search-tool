@@ -1,6 +1,6 @@
 # Tool Search Tool for Spring AI
 
-Dynamic tool discovery and selection for Spring AI, enabling LLMs to work efficiently with large tool libraries by discovering tools on-demand instead of loading all definitions upfront.
+> NOTE: this is Spring AI 1.1.x (e.g. Boot3.x and Spring Framework 6.x) compatibible version.
 
 **The Problem**
 
@@ -17,8 +17,6 @@ This project implements the **[Tool Search Tool](https://www.anthropic.com/engin
 - Model invokes discovered tools to complete the task
 
 **Result:** Significant token savings while maintaining access to thousands of tools.
-
-
 
 ## Project Structure
 
@@ -39,7 +37,25 @@ spring-ai-tool-search-tool/
 
 ### 1. Add Dependencies
 
-Add the snapshot repository to your `pom.xml`:
+Then add the dependencies:
+
+```xml
+<dependency>
+    <groupId>org.springaicommunity</groupId>
+    <artifactId>tool-search-tool</artifactId>
+    <version>1.0.0</version>
+</dependency>
+
+<!-- Choose a search strategy -->
+<dependency>
+    <groupId>org.springaicommunity</groupId>
+    <artifactId>tool-searcher-lucene</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+
+For snapshots add the snapshot repository to your `pom.xml`:
 
 ```xml
 <repositories>
@@ -51,23 +67,6 @@ Add the snapshot repository to your `pom.xml`:
         </snapshots>
     </repository>
 </repositories>
-```
-
-Then add the dependencies:
-
-```xml
-<dependency>
-    <groupId>org.springaicommunity</groupId>
-    <artifactId>tool-search-tool</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-</dependency>
-
-<!-- Choose a search strategy -->
-<dependency>
-    <groupId>org.springaicommunity</groupId>
-    <artifactId>tool-searcher-lucene</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-</dependency>
 ```
 
 ### 2. Configure the Advisor
