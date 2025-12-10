@@ -54,7 +54,7 @@
 
     <modules>
         <module>tool-search-tool-demo</module>
-        <!-- <module>pre-select-tool-demo</module> -->
+        <module>pre-select-tool-demo</module>
     </modules>
 
     <repositories>
