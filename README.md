@@ -1,6 +1,4 @@
-# Tool Search Tool for Spring AI [![build status](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml/badge.svg)](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity/tool-search-tool?label=Maven%20Central&versionPrefix=2)](https://central.sonatype.com/artifact/org.springaicommunity/tool-search-tool)
-[![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+# Tool Search Tool for Spring AI [![build status](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml/badge.svg)](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml) [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity/tool-search-tool?label=Maven%20Central&versionPrefix=2)](https://central.sonatype.com/artifact/org.springaicommunity/tool-search-tool) [![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
 > **NOTE:** this is a Spring AI 2.x (Boot 4 / Framework 7) compatibible version.
 
