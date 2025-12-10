@@ -50,14 +50,14 @@ Then add the dependencies:
 <dependency>
     <groupId>org.springaicommunity</groupId>
     <artifactId>tool-search-tool</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 
 <!-- Choose a search strategy -->
 <dependency>
     <groupId>org.springaicommunity</groupId>
     <artifactId>tool-searcher-lucene</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
