@@ -7,7 +7,7 @@ Dynamic tool discovery and selection for Spring AI, enabling LLMs to work effici
 
 **Related blog post:** [Smart Tool Selection: Achieving 34-64% Token Savings with Spring AI's Dynamic Tool Discovery](https://spring.io/blog/2025/12/11/spring-ai-tool-search-tools-tzolov)
 
-### The Problem**
+### The Problem
 
 As AI agents connect to more services—Slack, GitHub, Jira, MCP servers—tool libraries grow rapidly. A typical multi-server setup can easily have 50+ tools consuming **55,000+ tokens** before any conversation starts. Tool selection accuracy also degrades when models face 30+ similarly-named tools.
 
