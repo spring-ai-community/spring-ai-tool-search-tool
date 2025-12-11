@@ -160,7 +160,7 @@ mvn clean install
 ## Requirements
 
 - Java 17+
-- Spring AI 1.1.0-M4+
+- Spring AI 2.0.0+
 - Maven 3.6+
 
 ## Key Benefits
