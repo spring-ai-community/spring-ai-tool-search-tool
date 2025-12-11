@@ -37,12 +37,12 @@ public class Config {
 		return SimpleVectorStore.builder(embeddingModel).build();
 	}
 
-	// @Bean
+	@Bean
 	ToolSearcher vectorToolSearcher(VectorStore vectorStore) {
 		return new VectorToolSearcher(vectorStore);
 	}
 
-	@Bean
+	// @Bean
 	ToolSearcher luceneToolSearcher() {
 		return new LuceneToolSearcher(0.4f);
 	}

@@ -16,6 +16,8 @@ public class TokenCounterAdvisor implements BaseAdvisor {
 
 	AtomicInteger completionTokenCouner = new AtomicInteger(0);
 
+	AtomicInteger requestCouner = new AtomicInteger(0);
+
 	@Override
 	public int getOrder() {
 		return Ordered.LOWEST_PRECEDENCE - 1000;
@@ -29,18 +31,19 @@ public class TokenCounterAdvisor implements BaseAdvisor {
 	@Override
 	public ChatClientResponse after(ChatClientResponse chatClientResponse, AdvisorChain advisorChain) {
 		var usage = chatClientResponse.chatResponse().getMetadata().getUsage();
-		
+
+		requestCouner.incrementAndGet();
 		totalTokenCouner.addAndGet(usage.getTotalTokens());
 		promptTokenCouner.addAndGet(usage.getPromptTokens());
 		completionTokenCouner.addAndGet(usage.getCompletionTokens());
 
-		System.out.println("Current TOKENS Total: " + usage.getTotalTokens() + ", Completion: " + usage.getCompletionTokens()
-				+ ", Prompt: " + usage.getPromptTokens());
+		System.out.println("Current TOKENS Total: " + usage.getTotalTokens() + ", Completion: "
+				+ usage.getCompletionTokens() + ", Prompt: " + usage.getPromptTokens());
 
-		System.out.println("Accumulated TOKENS Total: " + totalTokenCouner.get() + ", Completion: " + completionTokenCouner.get()
-				+ ", Prompt: " + promptTokenCouner.get());
+		System.out.println(
+				"Accumulated TOKENS Total: " + totalTokenCouner.get() + ", Completion: " + completionTokenCouner.get()
+						+ ", Prompt: " + promptTokenCouner.get() + ", Number of requests: " + requestCouner.get());
 
-		
 		return chatClientResponse;
 	}
 
