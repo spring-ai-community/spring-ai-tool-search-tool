@@ -1,19 +1,21 @@
 # Tool Search Tool for Spring AI [![build status](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml/badge.svg?branch=1.0.x)](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml?query=branch%3A1.0.x) [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity/tool-search-tool?label=Maven%20Central&versionPrefix=1)](https://central.sonatype.com/artifact/org.springaicommunity/tool-search-tool) [![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
-> **NOTE:** this is Spring AI 1.1.x (Boot 3/Framework 6) compatibible version.
-
-> For Spring AI 2.x (Boot 4/Framework 7) compatible version visit: [Tool Search Tool v2.0.x](https://github.com/spring-ai-community/spring-ai-tool-search-tool)
-
 Dynamic tool discovery and selection for Spring AI, enabling LLMs to work efficiently with large tool libraries by discovering tools on-demand instead of loading all definitions upfront.
 
+**Related blog post:** [Smart Tool Selection: Achieving 34-64% Token Savings with Spring AI's Dynamic Tool Discovery](https://spring.io/blog/2025/12/11/spring-ai-tool-search-tools-tzolov)
 
-**The Problem**
+> _**NOTE:** this is Spring AI 1.1.x / Boot 3 compatibible version._
+> _For Spring AI 2.x / Boot 4 compatible version visit: [Tool Search Tool v2.0.x](https://github.com/spring-ai-community/spring-ai-tool-search-tool)_
+
+
+
+### The Problem
 
 As AI agents connect to more services—Slack, GitHub, Jira, MCP servers—tool libraries grow rapidly. A typical multi-server setup can easily have 50+ tools consuming **55,000+ tokens** before any conversation starts. Tool selection accuracy also degrades when models face 30+ similarly-named tools.
 
-<img style="fdisplay: block; margin: 0px auto; padding: 20px;" src="https://github.com/spring-io/spring-io-static/blob/main/blog/tzolov/20251208/spring-ai-tool-search-tool-calling-flow.png?raw=true" width="350" align="left"/>
+### The Solution
 
-**The Solution**
+<img style="fdisplay: block; margin: 0px auto; padding: 20px;" src="https://github.com/spring-io/spring-io-static/blob/main/blog/tzolov/20251208/spring-ai-tool-search-tool-calling-flow.png?raw=true" width="300" align="left"/>
 
 This project implements the **[Tool Search Tool](https://www.anthropic.com/engineering/advanced-tool-use)** pattern for Spring AI:
 - Model receives only a search tool initially (minimal tokens)
