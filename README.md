@@ -2,8 +2,8 @@
 
 Dynamic tool discovery and selection for Spring AI, enabling LLMs to work efficiently with large tool libraries by discovering tools on-demand instead of loading all definitions upfront.
 
-> _**NOTE:** Spring AI 2.x / Boot 4 compatibible version._
-> _For Spring AI 1.1.x / Boot 3 compatible veriosn visit: [Tool Search Tool v1.0.x](https://github.com/spring-ai-community/spring-ai-tool-search-tool/tree/1.0.x)_
+> _**NOTE:** This is Spring AI 2.x / Boot 4 compatibible version._
+> _For Spring AI 1.1.x / Boot 3 support switch to: [Tool Search Tool - v1.0.x](https://github.com/spring-ai-community/spring-ai-tool-search-tool/tree/1.0.x)_
 
 **Related blog post:** [Smart Tool Selection: Achieving 34-64% Token Savings with Spring AI's Dynamic Tool Discovery](https://spring.io/blog/2025/12/11/spring-ai-tool-search-tools-tzolov)
 
