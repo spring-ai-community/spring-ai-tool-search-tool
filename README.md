@@ -1,11 +1,9 @@
 # Tool Search Tool for Spring AI [![build status](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml/badge.svg)](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml) [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity/tool-search-tool?label=Maven%20Central&versionPrefix=2)](https://central.sonatype.com/artifact/org.springaicommunity/tool-search-tool) [![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
-Dynamic tool discovery and selection for Spring AI, enabling LLMs to work efficiently with large tool libraries by discovering tools on-demand instead of loading all definitions upfront.
-
 > _**NOTE:** This is Spring AI 2.x / Boot 4 compatibible version._
 > _For Spring AI 1.1.x / Boot 3 support switch to: [Tool Search Tool - v1.0.x](https://github.com/spring-ai-community/spring-ai-tool-search-tool/tree/1.0.x)_
 
-**Related blog post:** [Smart Tool Selection: Achieving 34-64% Token Savings with Spring AI's Dynamic Tool Discovery](https://spring.io/blog/2025/12/11/spring-ai-tool-search-tools-tzolov)
+Dynamic tool discovery and selection for Spring AI, enabling LLMs to work efficiently with large tool libraries by discovering tools on-demand instead of loading all definitions upfront. **Itroduction blog:** [Smart Tool Selection: Achieving 34-64% Token Savings with Spring AI's Dynamic Tool Discovery](https://spring.io/blog/2025/12/11/spring-ai-tool-search-tools-tzolov)
 
 ### The Problem
 
