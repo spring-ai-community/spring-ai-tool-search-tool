@@ -47,7 +47,24 @@ spring-ai-tool-search-tool/
 
 ### 1. Add Dependencies
 
-Add the snapshot repository to your `pom.xml`:
+Then add the dependencies:
+
+```xml
+<dependency>
+    <groupId>org.springaicommunity</groupId>
+    <artifactId>tool-search-tool</artifactId>
+    <version>2.0.0</version>
+</dependency>
+
+<!-- Choose a search strategy -->
+<dependency>
+    <groupId>org.springaicommunity</groupId>
+    <artifactId>tool-searcher-lucene</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
+
+For snapshot versions add the snapshot repository to your `pom.xml`:
 
 ```xml
 <repositories>
@@ -59,23 +76,6 @@ Add the snapshot repository to your `pom.xml`:
         </snapshots>
     </repository>
 </repositories>
-```
-
-Then add the dependencies:
-
-```xml
-<dependency>
-    <groupId>org.springaicommunity</groupId>
-    <artifactId>tool-search-tool</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-</dependency>
-
-<!-- Choose a search strategy -->
-<dependency>
-    <groupId>org.springaicommunity</groupId>
-    <artifactId>tool-searcher-lucene</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-</dependency>
 ```
 
 ### 2. Configure the Advisor
