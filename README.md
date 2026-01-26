@@ -51,14 +51,14 @@ Then add the dependencies:
 <dependency>
     <groupId>org.springaicommunity</groupId>
     <artifactId>tool-search-tool</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 </dependency>
 
 <!-- Choose a search strategy -->
 <dependency>
     <groupId>org.springaicommunity</groupId>
     <artifactId>tool-searcher-lucene</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 
@@ -158,7 +158,7 @@ mvn clean install
 ## Requirements
 
 - Java 17+
-- Spring AI 2.0.0+
+- Spring AI 2.0.0-M2+
 - Maven 3.6+
 
 ## Key Benefits
