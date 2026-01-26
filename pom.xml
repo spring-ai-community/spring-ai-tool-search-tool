@@ -56,7 +56,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
         <spring-ai.version>2.0.0-M2</spring-ai.version>
-        <lucene.version>10.3.2</lucene.version>
+        <lucene.version>9.12.3</lucene.version>
 
         <!-- plugin versions -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
