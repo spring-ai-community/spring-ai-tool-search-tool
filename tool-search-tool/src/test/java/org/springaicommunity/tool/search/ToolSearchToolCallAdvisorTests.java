@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.quality.Strictness;
+import reactor.core.publisher.Flux;
 
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
@@ -35,6 +36,8 @@ import org.springframework.ai.chat.client.advisor.DefaultAroundAdvisorChain;
 import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.StreamAdvisor;
+import org.springframework.ai.chat.client.advisor.api.StreamAdvisorChain;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -64,6 +67,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for {@link ToolSearchToolCallAdvisor}.
  *
  * @author Christian Tzolov
+ * @author Eunho Lee
  */
 @ExtendWith(MockitoExtension.class)
 public class ToolSearchToolCallAdvisorTests {
@@ -406,6 +410,209 @@ public class ToolSearchToolCallAdvisorTests {
 		verify(this.toolSearcher, times(1)).indexTool(anyString(), any(ToolReference.class));
 	}
 
+	@Test
+	void testStreamInitializeLoopIndexesTools() {
+		ToolSearchToolCallAdvisor advisor = ToolSearchToolCallAdvisor.builder()
+			.toolCallingManager(this.toolCallingManager)
+			.toolSearcher(this.toolSearcher)
+			.systemMessageSuffix("\n\nTest suffix")
+			.build();
+
+		ToolDefinition toolDef1 = DefaultToolDefinition.builder()
+			.name("tool1")
+			.description("Description for tool1")
+			.inputSchema("{}")
+			.build();
+		ToolDefinition toolDef2 = DefaultToolDefinition.builder()
+			.name("tool2")
+			.description("Description for tool2")
+			.inputSchema("{}")
+			.build();
+
+		when(this.toolCallingManager.resolveToolDefinitions(any(ToolCallingChatOptions.class)))
+			.thenReturn(List.of(toolDef1, toolDef2));
+
+		ChatClientRequest request = createMockRequest(true);
+		ChatClientResponse response = createMockResponse(false);
+
+		StreamAdvisor terminalAdvisor = new TerminalStreamAdvisor((req, chain) -> Flux.just(response));
+
+		DefaultAroundAdvisorChain chain = DefaultAroundAdvisorChain.builder(ObservationRegistry.NOOP)
+			.pushAll(List.of(advisor, terminalAdvisor))
+			.build();
+
+		advisor.adviseStream(request, chain).collectList().block();
+
+		ArgumentCaptor<ToolReference> toolRefCaptor = ArgumentCaptor.forClass(ToolReference.class);
+		verify(this.toolSearcher, times(2)).indexTool(anyString(), toolRefCaptor.capture());
+
+		List<ToolReference> indexedTools = toolRefCaptor.getAllValues();
+		assertThat(indexedTools).hasSize(2);
+		assertThat(indexedTools.get(0).toolName()).isEqualTo("tool1");
+		assertThat(indexedTools.get(1).toolName()).isEqualTo("tool2");
+	}
+
+	@Test
+	void testStreamInitializeLoopAugmentsSystemMessage() {
+		String customSuffix = "\n\nCUSTOM SUFFIX FOR TESTING";
+		ToolSearchToolCallAdvisor advisor = ToolSearchToolCallAdvisor.builder()
+			.toolCallingManager(this.toolCallingManager)
+			.toolSearcher(this.toolSearcher)
+			.systemMessageSuffix(customSuffix)
+			.build();
+
+		when(this.toolCallingManager.resolveToolDefinitions(any(ToolCallingChatOptions.class))).thenReturn(List.of());
+
+		SystemMessage originalSystemMessage = new SystemMessage("Original system message");
+		UserMessage userMessage = new UserMessage("test");
+
+		ToolCallingChatOptions toolOptions = mock(ToolCallingChatOptions.class,
+				Mockito.withSettings().strictness(Strictness.LENIENT));
+		when(toolOptions.copy()).thenReturn(toolOptions);
+		when(toolOptions.getInternalToolExecutionEnabled()).thenReturn(true);
+
+		Prompt prompt = new Prompt(List.of(originalSystemMessage, userMessage), toolOptions);
+		ChatClientRequest request = ChatClientRequest.builder().prompt(prompt).build();
+
+		ChatClientResponse response = createMockResponse(false);
+
+		ChatClientRequest[] capturedRequest = new ChatClientRequest[1];
+		StreamAdvisor capturingAdvisor = new TerminalStreamAdvisor((req, chain) -> {
+			capturedRequest[0] = req;
+			return Flux.just(response);
+		});
+
+		DefaultAroundAdvisorChain chain = DefaultAroundAdvisorChain.builder(ObservationRegistry.NOOP)
+			.pushAll(List.of(advisor, capturingAdvisor))
+			.build();
+
+		advisor.adviseStream(request, chain).collectList().block();
+
+		assertThat(capturedRequest[0]).isNotNull();
+		List<Message> messages = capturedRequest[0].prompt().getInstructions();
+		SystemMessage augmentedSystemMessage = (SystemMessage) messages.get(0);
+		assertThat(augmentedSystemMessage.getText()).contains("Original system message");
+		assertThat(augmentedSystemMessage.getText()).contains(customSuffix);
+	}
+
+	@Test
+	void testStreamBeforeExtractsToolReferences() {
+		ToolSearchToolCallAdvisor advisor = ToolSearchToolCallAdvisor.builder()
+			.toolCallingManager(this.toolCallingManager)
+			.toolSearcher(this.toolSearcher)
+			.build();
+
+		when(this.toolCallingManager.resolveToolDefinitions(any(ToolCallingChatOptions.class))).thenReturn(List.of());
+
+		ToolResponseMessage.ToolResponse toolSearchResponse = new ToolResponseMessage.ToolResponse("id1",
+				"toolSearchTool", "[\"weatherTool\", \"calculatorTool\"]");
+		ToolResponseMessage toolResponseMessage = ToolResponseMessage.builder()
+			.responses(List.of(toolSearchResponse))
+			.build();
+
+		SystemMessage systemMessage = new SystemMessage("System message");
+		UserMessage userMessage = new UserMessage("test");
+		AssistantMessage assistantMessage = AssistantMessage.builder().content("Using tool search").build();
+
+		TestToolCallingChatOptions toolOptions = new TestToolCallingChatOptions();
+
+		Prompt prompt = new Prompt(List.of(systemMessage, userMessage, assistantMessage, toolResponseMessage),
+				toolOptions);
+		ChatClientRequest request = ChatClientRequest.builder().prompt(prompt).build();
+
+		ChatClientResponse response = createMockResponse(false);
+
+		ChatClientRequest[] capturedRequest = new ChatClientRequest[1];
+		StreamAdvisor capturingAdvisor = new TerminalStreamAdvisor((req, chain) -> {
+			capturedRequest[0] = req;
+			return Flux.just(response);
+		});
+
+		DefaultAroundAdvisorChain chain = DefaultAroundAdvisorChain.builder(ObservationRegistry.NOOP)
+			.pushAll(List.of(advisor, capturingAdvisor))
+			.build();
+
+		advisor.adviseStream(request, chain).collectList().block();
+
+		assertThat(capturedRequest[0]).isNotNull();
+		ToolCallingChatOptions capturedOptions = (ToolCallingChatOptions) capturedRequest[0].prompt().getOptions();
+		assertThat(capturedOptions.getToolCallbacks()).hasSize(1);
+		assertThat(capturedOptions.getToolCallbacks().get(0).getToolDefinition().name()).isEqualTo("toolSearchTool");
+		assertThat(capturedOptions.getToolNames()).contains("weatherTool", "calculatorTool");
+	}
+
+	@Test
+	void testStreamToolSearchToolCallbackIsRegistered() {
+		ToolSearchToolCallAdvisor advisor = ToolSearchToolCallAdvisor.builder()
+			.toolCallingManager(this.toolCallingManager)
+			.toolSearcher(this.toolSearcher)
+			.build();
+
+		when(this.toolCallingManager.resolveToolDefinitions(any(ToolCallingChatOptions.class))).thenReturn(List.of());
+
+		ChatClientRequest request = createMockRequest(true);
+		ChatClientResponse response = createMockResponse(false);
+
+		ChatClientRequest[] capturedRequest = new ChatClientRequest[1];
+		StreamAdvisor capturingAdvisor = new TerminalStreamAdvisor((req, chain) -> {
+			capturedRequest[0] = req;
+			return Flux.just(response);
+		});
+
+		DefaultAroundAdvisorChain chain = DefaultAroundAdvisorChain.builder(ObservationRegistry.NOOP)
+			.pushAll(List.of(advisor, capturingAdvisor))
+			.build();
+
+		advisor.adviseStream(request, chain).collectList().block();
+
+		assertThat(capturedRequest[0]).isNotNull();
+		ToolCallingChatOptions capturedOptions = (ToolCallingChatOptions) capturedRequest[0].prompt().getOptions();
+		assertThat(capturedOptions.getToolCallbacks()).isNotEmpty();
+
+		boolean foundToolSearchTool = capturedOptions.getToolCallbacks()
+			.stream()
+			.anyMatch(callback -> "toolSearchTool".equals(callback.getToolDefinition().name()));
+
+		assertThat(foundToolSearchTool).isTrue();
+	}
+
+	@Test
+	void testStreamConversationIdFromContext() {
+		String expectedConversationId = "test-conversation-123";
+		ToolSearchToolCallAdvisor advisor = ToolSearchToolCallAdvisor.builder()
+			.toolCallingManager(this.toolCallingManager)
+			.toolSearcher(this.toolSearcher)
+			.build();
+
+		when(this.toolCallingManager.resolveToolDefinitions(any(ToolCallingChatOptions.class))).thenReturn(List.of());
+
+		Map<String, Object> context = new ConcurrentHashMap<>();
+		context.put(ChatMemory.CONVERSATION_ID, expectedConversationId);
+
+		ChatClientRequest request = createMockRequest(true);
+		request = request.mutate().context(context).build();
+
+		ChatClientResponse response = createMockResponse(false);
+
+		StreamAdvisor terminalAdvisor = new TerminalStreamAdvisor((req, chain) -> Flux.just(response));
+
+		DefaultAroundAdvisorChain chain = DefaultAroundAdvisorChain.builder(ObservationRegistry.NOOP)
+			.pushAll(List.of(advisor, terminalAdvisor))
+			.build();
+
+		advisor.adviseStream(request, chain).collectList().block();
+
+		// clearIndex is called twice: once in doInitializeLoopStream and once in
+		// doAfterStream
+		ArgumentCaptor<String> sessionIdCaptor = ArgumentCaptor.forClass(String.class);
+		verify(this.toolSearcher, times(2)).clearIndex(sessionIdCaptor.capture());
+
+		List<String> capturedIds = sessionIdCaptor.getAllValues();
+		assertThat(capturedIds).hasSize(2);
+		assertThat(capturedIds.get(0)).isEqualTo(expectedConversationId);
+		assertThat(capturedIds.get(1)).isEqualTo(expectedConversationId);
+	}
+
 	// Helper methods
 
 	private ChatClientRequest createMockRequest(boolean withToolCallingOptions) {
@@ -480,6 +687,35 @@ public class ToolSearchToolCallAdvisorTests {
 			Map<String, Object> mergedContext = new ConcurrentHashMap<>(req.context());
 			mergedContext.putAll(response.context());
 			return response.mutate().context(mergedContext).build();
+		}
+
+	}
+
+	private static class TerminalStreamAdvisor implements StreamAdvisor {
+
+		private final BiFunction<ChatClientRequest, StreamAdvisorChain, Flux<ChatClientResponse>> responseFunction;
+
+		TerminalStreamAdvisor(
+				BiFunction<ChatClientRequest, StreamAdvisorChain, Flux<ChatClientResponse>> responseFunction) {
+			this.responseFunction = responseFunction;
+		}
+
+		@Override
+		public String getName() {
+			return "terminal-stream";
+		}
+
+		@Override
+		public int getOrder() {
+			return 0;
+		}
+
+		@Override
+		public Flux<ChatClientResponse> adviseStream(ChatClientRequest req, StreamAdvisorChain chain) {
+			return this.responseFunction.apply(req, chain)
+				.map(response -> response.mutate()
+					.context(new ConcurrentHashMap<>(req.context()))
+					.build());
 		}
 
 	}

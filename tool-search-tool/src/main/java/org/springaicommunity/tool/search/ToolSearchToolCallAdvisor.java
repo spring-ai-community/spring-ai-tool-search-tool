@@ -24,17 +24,19 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.ToolCallAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.StreamAdvisorChain;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage.ToolResponse;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.model.tool.ToolCallingManager;
@@ -50,6 +52,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Tzolov
+ * @author Eunho Lee
  */
 public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 
@@ -138,6 +141,47 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 	@Override
 	protected ChatClientRequest doInitializeLoop(ChatClientRequest chatClientRequest,
 			CallAdvisorChain callAdvisorChain) {
+		return initializeToolSearch(chatClientRequest);
+	}
+
+	@Override
+	protected ChatClientResponse doFinalizeLoop(ChatClientResponse chatClientResponse,
+			CallAdvisorChain callAdvisorChain) {
+
+		clearToolSearchIndex(chatClientResponse.context());
+
+		return super.doFinalizeLoop(chatClientResponse, callAdvisorChain);
+	}
+
+	@Override
+	@SuppressWarnings("null")
+	protected ChatClientRequest doBeforeCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
+		return resolveToolCallbacks(chatClientRequest);
+	}
+
+	@Override
+	protected ChatClientRequest doInitializeLoopStream(ChatClientRequest chatClientRequest,
+			StreamAdvisorChain streamAdvisorChain) {
+		return initializeToolSearch(chatClientRequest);
+	}
+
+	@Override
+	protected ChatClientResponse doAfterStream(ChatClientResponse chatClientResponse,
+			StreamAdvisorChain streamAdvisorChain) {
+		ChatResponse chatResponse = chatClientResponse.chatResponse();
+		if (chatResponse == null || !chatResponse.hasToolCalls()) {
+			clearToolSearchIndex(chatClientResponse.context());
+		}
+		return chatClientResponse;
+	}
+
+	@Override
+	protected ChatClientRequest doBeforeStream(ChatClientRequest chatClientRequest,
+			StreamAdvisorChain streamAdvisorChain) {
+		return resolveToolCallbacks(chatClientRequest);
+	}
+
+	private ChatClientRequest initializeToolSearch(ChatClientRequest chatClientRequest) {
 
 		if (chatClientRequest.prompt().getOptions() instanceof ToolCallingChatOptions toolOptions) {
 
@@ -172,24 +216,18 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 				.build();
 		}
 
-		return super.doInitializeLoop(chatClientRequest, callAdvisorChain);
+		return chatClientRequest;
 	}
 
-	@Override
-	protected ChatClientResponse doFinalizeLoop(ChatClientResponse chatClientResponse,
-			CallAdvisorChain callAdvisorChain) {
-
-		var toolSearchToolConversationId = chatClientResponse.context().get("toolSearchToolConversationId");
+	private void clearToolSearchIndex(Map<String, Object> context) {
+		var toolSearchToolConversationId = context.get("toolSearchToolConversationId");
 		if (toolSearchToolConversationId != null) {
 			this.toolSearcher.clearIndex(toolSearchToolConversationId.toString());
 		}
-
-		return super.doFinalizeLoop(chatClientResponse, callAdvisorChain);
 	}
 
-	@Override
-	@SuppressWarnings("null")
-	protected ChatClientRequest doBeforeCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
+	@SuppressWarnings("unchecked")
+	private ChatClientRequest resolveToolCallbacks(ChatClientRequest chatClientRequest) {
 
 		if (chatClientRequest.prompt().getOptions() instanceof ToolCallingChatOptions toolOptions) {
 
@@ -229,7 +267,7 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 			return augmentedChatClientRequest;
 		}
 
-		return super.doBeforeCall(chatClientRequest, callAdvisorChain);
+		return chatClientRequest;
 	}
 
 	private List<String> extractToolNameReferences(List<Message> messages) {
