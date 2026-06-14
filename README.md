@@ -1,3 +1,17 @@
+> [!WARNING]
+> ## This repository has been archived
+>
+> The Tool Search Tool has been promoted into the core [Spring AI](https://github.com/spring-projects/spring-ai) project as of **Spring AI 2.0.0 GA**.
+>
+> **Please migrate to the official modules:**
+> - `org.springframework.ai:spring-ai-starter-tool-search-advisor` — Spring Boot starter (recommended)
+> - `org.springframework.ai:spring-ai-tool-search-advisor` — advisor module
+> - `org.springframework.ai:spring-ai-tool-search-tool` — `ToolIndex` API and implementations
+>
+> The API has been updated for Spring AI 2.0.0 conventions. See the [migration notes](https://spring.io/blog/2025/12/11/spring-ai-tool-search-tools-tzolov) in the original blog post for a summary of what changed.
+>
+> The **[v1.0.x branch](https://github.com/spring-ai-community/spring-ai-tool-search-tool/tree/1.0.x)** of this repository remains available for Spring AI 1.1.x / Spring Boot 3 compatibility and will not receive new features.
+
 # Tool Search Tool for Spring AI [![build status](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml/badge.svg)](https://github.com/spring-ai-community/spring-ai-tool-search-tool/actions/workflows/publish-snapshot.yml) [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity/tool-search-tool?label=Maven%20Central&versionPrefix=2)](https://central.sonatype.com/artifact/org.springaicommunity/tool-search-tool) [![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
 📖 **[Documentation](https://springaicommunity.mintlify.app/projects/incubating/spring-ai-tool-search-tool)**
