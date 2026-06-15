@@ -10,7 +10,7 @@ import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.Generation;
-import org.springframework.ai.model.ModelOptionsUtils;
+import org.springframework.ai.util.json.JsonParser;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 
 public class MyLoggingAdvisor implements BaseAdvisor {
@@ -49,14 +49,14 @@ public class MyLoggingAdvisor implements BaseAdvisor {
 	private void printUser(String label, List<Message> messages, Object tools) {
 		String mt = messages.stream()
 			.map(message -> message.getMessageType() == MessageType.SYSTEM ? " - SYSTEM "
-					: " - " + ModelOptionsUtils.toJsonString(message))
+					: " - " + JsonParser.toJson(message))
 			.collect(Collectors.joining("\n"));
-		System.out.println("\n" + label + ":\n" + mt + "\n   TOOLS: " + ModelOptionsUtils.toJsonString(tools) + "\n");
+		System.out.println("\n" + label + ":\n" + mt + "\n   TOOLS: " + JsonParser.toJson(tools) + "\n");
 	}
 
 	private void printAssistant(String label, List<Generation> generations) {
 		String gt = generations.stream()
-			.map(g -> " - " + ModelOptionsUtils.toJsonString(g.getOutput()))
+			.map(g -> " - " + JsonParser.toJson(g.getOutput()))
 			.collect(Collectors.joining("\n"));
 		System.out.println("\n" + label + ":\n" + gt + "\n");
 	}

@@ -7,7 +7,7 @@ import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
 import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.model.ModelOptionsUtils;
+import org.springframework.ai.util.json.JsonParser;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 
 public class MyLoggingAdvisor implements BaseAdvisor {
@@ -38,10 +38,10 @@ public class MyLoggingAdvisor implements BaseAdvisor {
 			.getInstructions()
 			.stream()
 			.map(message -> message.getMessageType() == MessageType.SYSTEM ? " - SYSTEM "
-					: " - " + ModelOptionsUtils.toJsonString(message))
+					: " - " + JsonParser.toJson(message))
 			.collect(Collectors.joining("\n"));
 
-		System.out.println("\nUSER:\n" + mt + "\n   TOOLS: " + ModelOptionsUtils.toJsonString(tools) + "\n");
+		System.out.println("\nUSER:\n" + mt + "\n   TOOLS: " + JsonParser.toJson(tools) + "\n");
 
 		return chatClientRequest;
 	}
@@ -51,7 +51,7 @@ public class MyLoggingAdvisor implements BaseAdvisor {
 		String gt = chatClientResponse.chatResponse()
 			.getResults()
 			.stream()
-			.map(g -> " - " + ModelOptionsUtils.toJsonString(g.getOutput()))
+			.map(g -> " - " + JsonParser.toJson(g.getOutput()))
 			.collect(Collectors.joining("\n"));
 
 		System.out.println("\nASSISTANT:\n" + gt + "\n");

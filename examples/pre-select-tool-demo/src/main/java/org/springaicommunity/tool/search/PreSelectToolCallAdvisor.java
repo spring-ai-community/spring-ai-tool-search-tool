@@ -51,7 +51,9 @@ public class PreSelectToolCallAdvisor extends ToolCallAdvisor {
 	protected PreSelectToolCallAdvisor(ToolCallingManager toolCallingManager, int advisorOrder,
 			ToolSearcher toolSearcher) {
 
-		super(toolCallingManager, advisorOrder);
+		// M8 removed the (ToolCallingManager, int) constructor; it delegated to
+		// (tcm, order, true, true), so preserve those defaults.
+		super(toolCallingManager, advisorOrder, true, true);
 		this.toolSearcher = toolSearcher;
 	}
 
@@ -127,10 +129,11 @@ public class PreSelectToolCallAdvisor extends ToolCallAdvisor {
 
 			// Augment the prompt with the selected tools and augmented system
 			// message.
-			ToolCallingChatOptions toolOptionsCopy = toolOptions.copy();
-
-			toolOptionsCopy.setToolCallbacks(new ArrayList<>(selectedToolCallbacks));
-			toolOptionsCopy.setToolNames(selectedToolNames);
+			// M8 made ToolCallingChatOptions read-only; build an immutable copy via mutate().
+			ToolCallingChatOptions toolOptionsCopy = toolOptions.mutate()
+				.toolCallbacks(new ArrayList<>(selectedToolCallbacks))
+				.toolNames(selectedToolNames)
+				.build();
 
 			var augmentedChatClientRequest = chatClientRequest.mutate()
 				.prompt(chatClientRequest.prompt().mutate().chatOptions(toolOptionsCopy).build())

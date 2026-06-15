@@ -116,7 +116,11 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 			ToolSearcher toolSearcher, String systemMessageSuffix, boolean referenceToolNameAccumulation,
 			Integer maxResults) {
 
-		super(toolCallingManager, advisorOrder);
+		// M8 removed the (ToolCallingManager, int) ToolCallAdvisor constructor; the
+		// builder-only API keeps the 4-arg form. The old 2-arg constructor delegated
+		// to (tcm, order, true, true), so preserve conversationHistoryEnabled=true and
+		// streamToolCallResponses=true to keep the original semantics.
+		super(toolCallingManager, advisorOrder, true, true);
 		this.toolSearcher = toolSearcher;
 		this.systemMessageSuffix = systemMessageSuffix;
 		this.referenceToolNameAccumulation = referenceToolNameAccumulation;
@@ -212,15 +216,18 @@ public class ToolSearchToolCallAdvisor extends ToolCallAdvisor {
 			});
 
 			// Augment the prompt with the selected tools and augmented system message.
-			ToolCallingChatOptions toolOptionsCopy = toolOptions.copy();
-			toolOptionsCopy.setToolCallbacks(new ArrayList<>(selectedToolCallbacks));
-			toolOptionsCopy.setToolNames(selectedToolNames);
-
-			Map<String, Object> toolContext = CollectionUtils.isEmpty(toolOptionsCopy.getToolContext())
-					? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(toolOptionsCopy.getToolContext());
+			// M8 made ToolCallingChatOptions read-only (removed copy() + setToolCallbacks/
+			// setToolNames/setToolContext); build an immutable copy via mutate().
+			Map<String, Object> toolContext = CollectionUtils.isEmpty(toolOptions.getToolContext())
+					? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(toolOptions.getToolContext());
 			toolContext.put("toolSearchToolConversationId",
 					chatClientRequest.context().get("toolSearchToolConversationId"));
-			toolOptionsCopy.setToolContext(toolContext);
+
+			ToolCallingChatOptions toolOptionsCopy = toolOptions.mutate()
+				.toolCallbacks(new ArrayList<>(selectedToolCallbacks))
+				.toolNames(selectedToolNames)
+				.toolContext(toolContext)
+				.build();
 
 			var augmentedChatClientRequest = chatClientRequest.mutate()
 				.prompt(chatClientRequest.prompt().mutate().chatOptions(toolOptionsCopy).build())

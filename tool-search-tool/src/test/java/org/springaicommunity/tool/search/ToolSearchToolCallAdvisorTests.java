@@ -25,9 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.quality.Strictness;
 
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
@@ -170,10 +168,12 @@ public class ToolSearchToolCallAdvisorTests {
 		SystemMessage originalSystemMessage = new SystemMessage("Original system message");
 		UserMessage userMessage = new UserMessage("test");
 
-		ToolCallingChatOptions toolOptions = mock(ToolCallingChatOptions.class,
-				Mockito.withSettings().strictness(Strictness.LENIENT));
-		when(toolOptions.copy()).thenReturn(toolOptions);
-		when(toolOptions.getInternalToolExecutionEnabled()).thenReturn(true);
+		// M8 made ToolCallingChatOptions read-only (no copy()/setters; mutate() is now
+		// the immutable copy path). Use the real builder instead of a Mockito stub so
+		// the advisor's mutate() chain in doBeforeCall works against a concrete impl.
+		ToolCallingChatOptions toolOptions = ToolCallingChatOptions.builder()
+			.internalToolExecutionEnabled(true)
+			.build();
 
 		Prompt prompt = new Prompt(List.of(originalSystemMessage, userMessage), toolOptions);
 		ChatClientRequest request = ChatClientRequest.builder().prompt(prompt).build();
@@ -245,8 +245,10 @@ public class ToolSearchToolCallAdvisorTests {
 		UserMessage userMessage = new UserMessage("test");
 		AssistantMessage assistantMessage = AssistantMessage.builder().content("Using tool search").build();
 
-		// Use real TestToolCallingChatOptions instead of mocking
-		TestToolCallingChatOptions toolOptions = new TestToolCallingChatOptions();
+		// Use the real M8 ToolCallingChatOptions builder instead of mocking
+		ToolCallingChatOptions toolOptions = ToolCallingChatOptions.builder()
+			.internalToolExecutionEnabled(true)
+			.build();
 
 		Prompt prompt = new Prompt(List.of(systemMessage, userMessage, assistantMessage, toolResponseMessage),
 				toolOptions);
@@ -373,9 +375,11 @@ public class ToolSearchToolCallAdvisorTests {
 			.build();
 		when(mockToolCallback.getToolDefinition()).thenReturn(mockToolDef);
 
-		// Use real TestToolCallingChatOptions with the tool callback configured
-		TestToolCallingChatOptions toolOptions = new TestToolCallingChatOptions();
-		toolOptions.setToolCallbacks(List.of(mockToolCallback));
+		// Use the real M8 ToolCallingChatOptions builder with the tool callback configured
+		ToolCallingChatOptions toolOptions = ToolCallingChatOptions.builder()
+			.toolCallbacks(List.of(mockToolCallback))
+			.internalToolExecutionEnabled(true)
+			.build();
 
 		when(this.toolCallingManager.resolveToolDefinitions(any(ToolCallingChatOptions.class)))
 			.thenReturn(List.of(mockToolDef));
@@ -413,9 +417,9 @@ public class ToolSearchToolCallAdvisorTests {
 
 		ChatOptions options = null;
 		if (withToolCallingOptions) {
-			// Use a real TestToolCallingChatOptions instead of mocking to avoid Byte
-			// Buddy issues on Java 25
-			options = new TestToolCallingChatOptions();
+			// Use the real M8 ToolCallingChatOptions builder instead of mocking to avoid
+			// Byte Buddy issues on Java 25
+			options = ToolCallingChatOptions.builder().internalToolExecutionEnabled(true).build();
 		}
 
 		Prompt prompt = new Prompt(instructions, options);
@@ -480,113 +484,6 @@ public class ToolSearchToolCallAdvisorTests {
 			Map<String, Object> mergedContext = new ConcurrentHashMap<>(req.context());
 			mergedContext.putAll(response.context());
 			return response.mutate().context(mergedContext).build();
-		}
-
-	}
-
-	/**
-	 * Simple test implementation of ToolCallingChatOptions to avoid Mockito/ByteBuddy
-	 * issues on Java 25. Implements the required methods with sensible defaults.
-	 */
-	private static class TestToolCallingChatOptions implements ToolCallingChatOptions {
-
-		private boolean internalToolExecutionEnabled = true;
-
-		private List<ToolCallback> toolCallbacks = new java.util.ArrayList<>();
-
-		private java.util.Set<String> toolNames = new java.util.HashSet<>();
-
-		private Map<String, Object> toolContext = new java.util.HashMap<>();
-
-		@Override
-		public List<ToolCallback> getToolCallbacks() {
-			return this.toolCallbacks;
-		}
-
-		@Override
-		public void setToolCallbacks(List<ToolCallback> toolCallbacks) {
-			this.toolCallbacks = toolCallbacks != null ? toolCallbacks : new java.util.ArrayList<>();
-		}
-
-		@Override
-		public java.util.Set<String> getToolNames() {
-			return this.toolNames;
-		}
-
-		@Override
-		public void setToolNames(java.util.Set<String> toolNames) {
-			this.toolNames = toolNames != null ? toolNames : new java.util.HashSet<>();
-		}
-
-		@Override
-		public Boolean getInternalToolExecutionEnabled() {
-			return this.internalToolExecutionEnabled;
-		}
-
-		@Override
-		public void setInternalToolExecutionEnabled(Boolean enabled) {
-			this.internalToolExecutionEnabled = enabled != null ? enabled : true;
-		}
-
-		@Override
-		public Map<String, Object> getToolContext() {
-			return this.toolContext;
-		}
-
-		@Override
-		public void setToolContext(Map<String, Object> toolContext) {
-			this.toolContext = toolContext != null ? toolContext : new java.util.HashMap<>();
-		}
-
-		@Override
-		public TestToolCallingChatOptions copy() {
-			TestToolCallingChatOptions copy = new TestToolCallingChatOptions();
-			copy.internalToolExecutionEnabled = this.internalToolExecutionEnabled;
-			copy.toolCallbacks = new java.util.ArrayList<>(this.toolCallbacks);
-			copy.toolNames = new java.util.HashSet<>(this.toolNames);
-			copy.toolContext = new java.util.HashMap<>(this.toolContext);
-			return copy;
-		}
-
-		// ChatOptions methods - return null or defaults for unused options
-		@Override
-		public String getModel() {
-			return null;
-		}
-
-		@Override
-		public Double getFrequencyPenalty() {
-			return null;
-		}
-
-		@Override
-		public Integer getMaxTokens() {
-			return null;
-		}
-
-		@Override
-		public Double getPresencePenalty() {
-			return null;
-		}
-
-		@Override
-		public List<String> getStopSequences() {
-			return null;
-		}
-
-		@Override
-		public Double getTemperature() {
-			return null;
-		}
-
-		@Override
-		public Integer getTopK() {
-			return null;
-		}
-
-		@Override
-		public Double getTopP() {
-			return null;
 		}
 
 	}
